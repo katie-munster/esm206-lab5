@@ -7,13 +7,107 @@ output:
     theme: journal
     number_sections: yes
     toc: yes
+    code_folding: hide # we added this line
+    
+    ## Note: settings symbol -> Output Options -> Apply theme -> Number headings -> Include table of contents
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE, warning = FALSE, message = FALSE} 
+
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+# only using tidyverse today
 ```
 
-# Note: settings symbol -> Output Options -> Apply theme -> Number headings -> Include table of contents
+# Confidence Intervals
+
+In this section, we'll learn to use the 't.test()' function as a way to return the confidence interval using the t-distribution.
+
+## Example 1
+
+Create a mock sample of observation values, and find the confidence interval. Then we'll learn how to report that.
+
+```{r}
+pika_mass <- c(82, 94, 110, 70, 86, 99, 102, 320, 5000)
+# use a representative sample
+
+pika_mean <- mean(pika_mass)
+
+pika_sd <- sd(pika_mass)
+
+pika_ci <- t.test(pika_mass)
+
+# type pika_ci in console to see it
+# degrees of freedom is sample size - 1
+
+pika_ci
+# never just return this. this is not an acceptable way to report any summary of anything
+```
+
+
+### Risky & tedious way:
+
+Mean pika mass at Paiute Pass is 91.9 g $\pm$ 13.5 g (mean $\pm$ 1 standard deviation, n = 7)
+ with a 95% confidence interval of [79.4, 104.4] g.
+- prone to human error. manually writing in things is bad.
+- also tedious, ie. if we added one more pika mass and data changed.
+- not reproducible
+
+### A high initial investment, but safer & better way:
+
+In-line code referencing to stored objects!
+
+Use a single backtick on either side of a lowercase r to create an in-line bit of code. Backtick is under the ~ on the keyboard; not an apostrophe.
+
+Mean pika mass at Paiute Pass is `r mean(pika_mass)`
+
+Mean pika mass at Paiute Pass is `r pika_mean`
+
+Mean pika mass at Paiute Pass is `r round(pika_mean, 1)` g $\pm$ `r round(pika_sd, 1)` g (mean $\pm$ 1 standard deviation, n = `r length(pika_mass)`) with a 95% confidence interval of [`r round(pika_ci$conf.int[1], 1)`, `r round(pika_ci$conf.int[2], 1)`] g.
+
+```{r}
+# my_list$name
+# my_list$age
+# use $ to refer to elements in a list, the same way we would for columns of a dataframe
+# ?t.test in console for more information
+# pika_ci$p.value returns the p-value
+# pika_ci$estimate returns the mean value
+
+# pika_ci$conf.int
+
+# pika_mass
+# pika_mass[2] returns the second element of the vector. not 0 based like Python
+
+# my_list$name[2]
+```
+
+# Two-sample t-test
+
+Use a two-sample t-test to test the null hypothesis that samples were drawn from populations with the same mean (difference in means = 0).
+
+- H0: Means difference = 0
+- HA: Means difference is NOT = 0
+
+This is a two-sided t-test beecause no directionality is implied.
+
+## Example 1
+
+```{r}
+oak_trees <- c(29, 19, 22, 30, 35, 16, 20, 7)
+  
+pine_trees <- c(48, 32, 41, 40, 56, 70, 30, 19, 20)
+```
+
+Is there a significant difference in mean heights for oak and pine trees?
+
+```{r}
+trees_t <- t.test(oak_trees, pine_trees)
+```
+
+The p-value of `r trees_t$p.value` means that there is `r (trees_t$p.value) * 100`% chance of finding sample means *at least as different as those I found* by random chance if they were drawn from populations with the same mean height.
+
+I would reject the null hypothesis
+
 
 # Introduction
 
@@ -22,17 +116,3 @@ knitr::opts_chunk$set(echo = TRUE)
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 ### More information
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
