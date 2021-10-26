@@ -109,6 +109,77 @@ The p-value of `r trees_t$p.value` means that there is `r (trees_t$p.value) * 10
 I would reject the null hypothesis
 
 
+## Example 2
+
+Using the `mpg` dataset to compare city gas mileage for SUVs and compact cars.
+
+```{r}
+# In console, use unique(mpg$class) to see all the classes in that column
+
+# Create a subset called compact_suv that only contains observations where the class is suv OR compact
+
+compact_suv <- mpg %>% 
+  filter(class %in% c("compact", "suv"))
+# In console, run unique(compact_suv$class) to run a check on this.
+```
+
+```{r}
+ggplot(data = compact_suv, aes(x = cty)) +
+  geom_histogram(bins = 12) +
+  facet_wrap(~ class)
+
+# both of these graphs, look relatively normally distributed. no concerns
+# this is exploratory
+
+# Do you think assumptions of normality make sense?
+# I think means is an appropriate method of central tendancy (?)
+
+
+ggplot(data = compact_suv, aes(sample = cty)) +
+  geom_qq() +
+  facet_wrap(~ class)
+# the more divergent from linear, the more evidence that this is not from a normal distribution
+# here, there is nothing ridiculous skewed that would justify not doing a t test
+# qq plot should only be used in combination with histograms, etc.
+
+# these are exploratory plots. means make sense to compare these two plots
+```
+
+
+```{r}
+# make a summary table:
+car_stats <- compact_suv %>% 
+  group_by(class) %>% 
+  summarize(mean_city = mean(cty),
+            sd_city = round(sd(cty), 1),
+            sample_size = n())
+
+car_stats
+
+# if you were printing this in document, update column headers to contain units. do rounding. etc.
+```
+
+
+```{r}
+compact_sample <- compact_suv %>% 
+  filter(class == "compact") %>% 
+  pull(cty)
+
+suv_sample <- compact_suv %>% 
+  filter(class == "suv") %>% 
+  pull (cty)
+
+cars_t <- t.test(compact_sample, suv_sample)
+# look at cars_t in the console
+
+# p-value is very small. There is a neglible probability that these samples were drawn from populations of the same mean.
+```
+
+stats speak: reject the null hypothesis of equal mean city gas mileages
+
+paper: Mean gas mileage for compact cars and SUVs differs significantly (t(`r cars_t$parameter`) = `r cars_t$statistic`, p < 0.001, $\alpha$ = 0.05).
+
+
 # Introduction
 
 ## R Markdown
